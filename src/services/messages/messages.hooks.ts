@@ -1,23 +1,22 @@
 import { Hook, HookContext } from '@feathersjs/feathers';
 
-export default () : Hook => {
+export default (): Hook => {
   return async (context: HookContext) => {
-    const { data } = context;
+    const { app, method, result, params } = context;
+    const addUser = async (message: any) => {
+      const user = await app.service('users').get(message.userId, params);
 
-    if(!data.text) {
-      throw new Error('A message must have a text');
-    }
-
-    const user = context.params.user;
-    const text = data.text
-      .substring(0, 400);
-
-    context.data = {
-      text,
-      userId: user._id,
-      createdAt: new Date().getTime()
+      return {
+        ...message,
+        user
+      };
     };
 
+    if (method === 'find') {
+      context.result.data = await Promise.all(result.data.map(addUser));
+    } else {
+      context.result = await addUser(result);
+    }
     return context;
   };
 };
