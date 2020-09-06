@@ -8,7 +8,7 @@ const query = 's=60';
 const getGravatar = (email: string) => {
   const hash = crypto.createHash('md5').update(email.toLowerCase()).digest('hex');
   return `${gravatarUrl}/${hash}?${query}`;
-}
+};
 
 interface UserData {
   _id?: string;
