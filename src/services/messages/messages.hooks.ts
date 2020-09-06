@@ -1,36 +1,23 @@
-import * as authentication from '@feathersjs/authentication';
-// Don't remove this comment. It's needed to format import lines nicely.
+import { Hook, HookContext } from '@feathersjs/feathers';
 
-const { authenticate } = authentication.hooks;
+export default () : Hook => {
+  return async (context: HookContext) => {
+    const { data } = context;
 
-export default {
-  before: {
-    all: [ authenticate('jwt') ],
-    find: [],
-    get: [],
-    create: [],
-    update: [],
-    patch: [],
-    remove: []
-  },
+    if(!data.text) {
+      throw new Error('A message must have a text');
+    }
 
-  after: {
-    all: [],
-    find: [],
-    get: [],
-    create: [],
-    update: [],
-    patch: [],
-    remove: []
-  },
+    const user = context.params.user;
+    const text = data.text
+      .substring(0, 400);
 
-  error: {
-    all: [],
-    find: [],
-    get: [],
-    create: [],
-    update: [],
-    patch: [],
-    remove: []
-  }
+    context.data = {
+      text,
+      userId: user._id,
+      createdAt: new Date().getTime()
+    };
+
+    return context;
+  };
 };
