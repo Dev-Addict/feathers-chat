@@ -1,22 +1,38 @@
-import { Hook, HookContext } from '@feathersjs/feathers';
+import * as authentication from '@feathersjs/authentication';
+import processMessage from '../../hooks/process-message';
+import populateUser from '../../hooks/populate-user';
+// Don't remove this comment. It's needed to format import lines nicely.
 
-export default (): Hook => {
-  return async (context: HookContext) => {
-    const { app, method, result, params } = context;
-    const addUser = async (message: any) => {
-      const user = await app.service('users').get(message.userId, params);
+const { authenticate } = authentication.hooks;
 
-      return {
-        ...message,
-        user
-      };
-    };
+export default {
+  before: {
+    all: [ authenticate('jwt') ],
+    find: [],
+    get: [],
+    create: [processMessage()],
+    update: [],
+    patch: [],
+    remove: []
+  },
 
-    if (method === 'find') {
-      context.result.data = await Promise.all(result.data.map(addUser));
-    } else {
-      context.result = await addUser(result);
-    }
-    return context;
-  };
+  after: {
+    all: [populateUser()],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  },
+
+  error: {
+    all: [],
+    find: [],
+    get: [],
+    create: [],
+    update: [],
+    patch: [],
+    remove: []
+  }
 };
